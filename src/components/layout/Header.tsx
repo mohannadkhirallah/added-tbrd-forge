@@ -1,4 +1,3 @@
-import { useMsal } from "@azure/msal-react";
 import { Brain, LogOut, Moon, Sun, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,22 +11,18 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 export function Header() {
-  const { instance, accounts } = useMsal();
   const { theme, toggleTheme } = useTheme();
-  const account = accounts[0];
-
-  const handleLogout = () => {
-    instance.logoutRedirect();
-  };
+  const { user, logout } = useAuth();
 
   const getUserInitials = () => {
-    if (!account) return "U";
-    const name = account.name || account.username;
+    if (!user) return "U";
+    const name = user.name || user.username;
     return name
       .split(" ")
-      .map((n) => n[0])
+      .map((n: string) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
@@ -74,9 +69,9 @@ export function Header() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{account?.name || "User"}</p>
+                <p className="text-sm font-medium">{user?.name || "User"}</p>
                 <p className="text-xs text-muted-foreground">
-                  {account?.username}
+                  {user?.isAnonymous ? "Guest User" : user?.username || ""}
                 </p>
               </div>
             </DropdownMenuLabel>
@@ -86,7 +81,7 @@ export function Header() {
               Profile
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+            <DropdownMenuItem onClick={logout} className="text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Sign Out
             </DropdownMenuItem>
